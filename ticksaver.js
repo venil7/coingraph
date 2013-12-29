@@ -10,11 +10,14 @@ var logger = Logger(module, config.logging.ticker);
 var TickSaver = function(config) {
   config = config || {};
   var that = this;
-  this.pairs = Array.isArray(config.pairs) ? config.pairs : [];
+  this.symbols = Array.isArray(config.symbols) ? config.symbols : [];
   this.tickers = [];
-  if (this.pairs.length) {
-    this.pairs.forEach(function(pair, index, arr){
-      var ticker = new Ticker.BtceTicker(pair);
+  if (this.symbols.length) {
+    this.symbols.forEach(function(symbol, index, arr) {
+      symbol = (typeof symbol == "string")
+          ? { pair: symbol, freq: config.tickerFreq }
+          : (typeof symbol == "object" ? { pair: symbol.pair, freq: symbol.freq } : {});
+      var ticker = new Ticker.BtceTicker(symbol.pair, symbol.freq);
       ticker.on('tick', that.tickHandler.bind(that));
       that.tickers.push(ticker);
     });
@@ -26,14 +29,14 @@ TickSaver.prototype = Object.create(Events.EventEmitter.prototype);
 
 TickSaver.prototype.save = function(pairData, pair) {
     this.db
-    .then(function(db){
+    .then(function(db) {
       collection = db.collection(pair);
       return Q.nfcall(collection.insert.bind(collection), pairData);
     })
-    .then(function(){
+    .then(function() {
       logger.info('saiving pair data', pair, new Date(pairData.server_time * 1000));
     })
-    .catch(function(err){
+    .catch(function(err) {
       logger.error(err.toString());
     });
 };

@@ -1,6 +1,7 @@
 {
   "mongoServer": "mongodb://localhost:27017/btcgraph",
-  "pairs": ["btc_usd", "btc_eur", "ltc_usd", "ltc_eur", "ltc_btc"],
+  "symbols": ["btc_usd", "btc_eur", "ltc_usd", "ltc_eur", "ltc_btc"],
+  "tickerFreq": 5000,
   "logging": {
     "ticker": {
       "filename": "./ticker.log",
