@@ -1,10 +1,16 @@
 {
-  "mongoServer": "mongodb://localhost:27017/btcgraph",
+  "mongoServer": "mongodb://localhost:27017/coingraph",
   "symbols": ["btc_usd", "btc_eur", "ltc_usd", "ltc_eur", "ltc_btc"],
   "tickerFreq": 5000,
   "logging": {
     "ticker": {
       "filename": "./ticker.log",
+      "json": false,
+      "timestamp": true,
+      "level": "error"
+    },
+    "web": {
+      "filename": "./web.log",
       "json": false,
       "timestamp": true,
       "level": "error"

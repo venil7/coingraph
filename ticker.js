@@ -3,6 +3,8 @@ var Btce    = require('btce'),
 
 var BtceTicker = function (pair, freq) {
   var that = this;
+  this.pair = pair;
+  this.freq = freq;
   this.btce = new Btce();
   this.handler = setTimeout(function() {
     that.query();

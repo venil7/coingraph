@@ -1,7 +1,8 @@
-var winston = require('winston');
+var winston = require('winston'),
+    path = require('path');
 
 module.exports = function(module, transport_config) {
-  var id = module.id;
+  var id = path.basename(module.filename);
   var logger = new (winston.Logger)({
     transports: [
       new winston.transports.File(transport_config),

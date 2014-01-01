@@ -30,11 +30,13 @@ TickSaver.prototype = Object.create(Events.EventEmitter.prototype);
 TickSaver.prototype.save = function(pairData, pair) {
     this.db
     .then(function(db) {
-      collection = db.collection(pair);
+      var collection = db.collection(pair);
+      pairData.server_time *= 1000;
+      pairData.updated *= 1000;
       return Q.nfcall(collection.insert.bind(collection), pairData);
     })
     .then(function() {
-      logger.info('saiving pair data', pair, new Date(pairData.server_time * 1000));
+      logger.info('saiving pair data', pair, new Date(pairData.server_time));
     })
     .catch(function(err) {
       logger.error(err.toString());
@@ -46,4 +48,10 @@ TickSaver.prototype.tickHandler = function(err, pairData, pair) {
   if (pairData) this.save(pairData, pair);
 };
 
-var saver = new TickSaver(config);
+module.exports = {
+  TickSaver: TickSaver
+};
+
+if (!module.parent) {
+  var saver = new TickSaver(config);
+}
