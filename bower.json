@@ -1,0 +1,22 @@
+{
+  "name": "btcgraph",
+  "main": "index.js",
+  "version": "0.0.1",
+  "authors": [
+    "Art <github@darkruby.co.uk>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angles": "*",
+    "bootstrap": "~3.0.3",
+    "Chart.js": "*"
+  },
+  "private": true
+}

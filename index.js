@@ -1,24 +1,23 @@
 var static = require('node-static'),
     http   = require('http'),
     socket = require('socket.io'),
-    // Q      = require('q'),
     Query  = require('./query'),
     Logger = require('./logger'),
     config = require('./config');
 
 var logger = Logger(module, config.logging.web);
-var staticServer = new static.Server('./public');
+var staticServer = new static.Server(config.web);
 
 var http = http.createServer(function (request, response) {
   request.addListener('end', function () {
     staticServer.serve(request, response);
   }).resume();
-}).listen(8080);
+}).listen(process.env.PORT || 3000);
 
 var io = socket.listen(http, { log: false });
 var query = new Query.Query(config);
 
-var handle = setInterval();
+// var handle = setInterval();
 
 
 io.sockets.on('connection', function (socket) {

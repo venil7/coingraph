@@ -1,0 +1,21 @@
+#chart {
+  width: 920px;
+  height: 400px;
+  background-color: Linen;
+  float: none;
+  margin: 0 auto;
+}
+body {
+  background-image: url(images/subtle-stripes-pattern-2273.png);
+}
+.jumbotron {
+  padding-top: 0px;
+  background: rgba(176, 196, 222, 0.5);
+}
+._3d {
+  font-family: 'Play', cursive;
+  tline-height: 1em;
+  color: Linen;
+  font-size: 74px;
+  text-shadow: 0px 0px 0 #f0f0f0, 1px 1px 0 #ebebeb, 2px 2px 0 #e6e6e6, 3px 3px 2px rgba(0, 0, 0, 0), 3px 3px 1px rgba(0, 0, 0, 0.5), 0px 0px 2px rgba(0, 0, 0, 0.2);
+}
