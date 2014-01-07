@@ -12,13 +12,15 @@ var Query = function(config) {
   this.db = Q.nfcall(Mongodb.connect.bind(Mongodb), config.mongoServer);
 };
 
-Query.LIMIT = 100;
-
 Query.prototype = Object.create(Events.EventEmitter.prototype);
+
+Query.prototype.getPairArray = function () {
+  return config.symbols.map(function(x) { return x.pair; });
+};
 
 Query.prototype.get = function (pair, aggr, range) {
   var that = this;
-  var allowedPairs = config.symbols.map(function(s) { return typeof s == "object" ? s.pair : s.toString(); });
+  var allowedPairs = this.getPairArray();
   if (!~allowedPairs.indexOf(pair)) { throw new Error("pair is not configured."); }
   if (!~["hour", "day", "minute"].indexOf(aggr)) { throw new Error("aggregate func is not configured."); }
 
@@ -26,7 +28,7 @@ Query.prototype.get = function (pair, aggr, range) {
       yesterday = now - 60 * 60 * 24 * 1000;
   range = (Array.isArray(range) && (range.length >= 2))
           ? range.slice(0, 2)
-          : typeof range == "number" ? [now, range] : [ now, yesterday];
+          : typeof range == "number" ? [now, range] : [now, yesterday];
   var gte = Math.min.apply(null, range);
   var lte = Math.max.apply(null, range);
   var query = { server_time: { $gte: gte, $lte: lte } };
@@ -39,6 +41,14 @@ Query.prototype.get = function (pair, aggr, range) {
       that.emit('get', pair);
       return Q.nfcall(collection.mapReduce.bind(collection), map, MAP.reduce, { out: { inline: 1 }, query: query });
     });
+};
+
+Query.prototype.get_range = function(pair, range) {
+  var allRanges = config.ranges.map(function(x) { return x.name; } );
+  var idx = allRanges.indexOf(range);
+  if (!~idx) { throw new Error("range is not configured."); }
+  var range = config.ranges[idx];
+  return this.get(pair, range.aggr, range.range);
 };
 
 Query.prototype.close = function () {

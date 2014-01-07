@@ -47,6 +47,9 @@ module.exports = function(grunt){
               'dist/styles/style.css':
                 [ 'web/styles/*.less' ]
             }
+          },
+          options: {
+            compress: true
           }
         },
 
@@ -108,6 +111,12 @@ module.exports = function(grunt){
               stderr: true,
               failOnError: true
           }
+        },
+
+        open : {
+          dev : {
+            path: 'http://localhost:3000/'
+          }
         }
     });
 
@@ -131,6 +140,7 @@ module.exports = function(grunt){
     grunt.registerTask('dev', [
       'build',
       'shell:webserver',
+      'open:dev',
       'watch']);
 
     grunt.registerTask('default', ['build']);

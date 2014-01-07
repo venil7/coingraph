@@ -23,7 +23,12 @@ var query = new Query.Query(config);
 io.sockets.on('connection', function (socket) {
   logger.info('new client connected');
 
-  socket.on('range', function (pair) {
+  socket.emit('welcome', {
+    ranges: config.ranges,
+    symbols: config.symbols
+  });
+
+  socket.on('update', function (req) {
 
   });
 });
@@ -32,4 +37,4 @@ process.on('SIGINT', function() {
   logger.info('disconnecting from', config.mongoServer);
   query.close();
   process.exit( );
-})
+});

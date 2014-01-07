@@ -2,7 +2,7 @@ var Mongodb = require('mongodb'),
     Events  = require('events'),
     Q       = require('q'),
     Ticker  = require('./ticker'),
-    config  = require('./config.json'),
+    config  = require('./config'),
     Logger  = require('./logger');
 
 var logger = Logger(module, config.logging.ticker);
@@ -10,14 +10,10 @@ var logger = Logger(module, config.logging.ticker);
 var TickSaver = function(config) {
   config = config || {};
   var that = this;
-  this.symbols = Array.isArray(config.symbols) ? config.symbols : [];
   this.tickers = [];
-  if (this.symbols.length) {
-    this.symbols.forEach(function(symbol, index, arr) {
-      symbol = (typeof symbol == "string")
-          ? { pair: symbol, freq: config.tickerFreq }
-          : (typeof symbol == "object" ? { pair: symbol.pair, freq: symbol.freq } : {});
-      var ticker = new Ticker.BtceTicker(symbol.pair, symbol.freq);
+  if (config.symbols.length) {
+    config.symbols.forEach(function(symbol, index, arr) {
+      var ticker = new Ticker.BtceTicker(symbol.pair, symbol.freq || config.tickerFreq);
       ticker.on('tick', that.tickHandler.bind(that));
       that.tickers.push(ticker);
     });
@@ -48,10 +44,27 @@ TickSaver.prototype.tickHandler = function(err, pairData, pair) {
   if (pairData) this.save(pairData, pair);
 };
 
+TickSaver.prototype.shutdown = function() {
+  logger.info('gracefully shutting down saver');
+  for(var i in this.tickers || []) {
+    var ticker = this.tickers[i];
+    ticker.cancel();
+  }
+  this.db.then(function(db){
+    db.close();
+  });
+};
+
 module.exports = {
   TickSaver: TickSaver
 };
 
 if (!module.parent) {
   var saver = new TickSaver(config);
+
+  process.on('SIGINT', function() {
+    logger.info('disconnecting from', config.mongoServer);
+    saver.shutdown();
+    process.exit();
+  });
 }

@@ -24,23 +24,32 @@
 				<div class="row">
 					<div class="col-md-6 col-md-offset-1">
 						<div class="btn-group btn-group-xs">
-						  <button type="button" class="btn btn-success">1 month</button>
+						  <button type="button" class="btn btn-default"
+						  		ng-class=""
+						  		ng-click="setRange(range)"
+						  		ng-repeat="range in ranges">{{range.name}}</button>
+
+						  <!-- <button type="button" class="btn btn-success">1 month</button>
 						  <button type="button" class="btn btn-default">1 week</button>
 						  <button type="button" class="btn btn-default">1 day</button>
 						  <button type="button" class="btn btn-default">12 Hours</button>
 						  <button type="button" class="btn btn-default">6 Hours</button>
 						  <button type="button" class="btn btn-default">3 Hours</button>
 						  <button type="button" class="btn btn-default">1 Hour</button>
-						  <button type="button" class="btn btn-default">10 mins</button>
+						  <button type="button" class="btn btn-default">10 mins</button> -->
 						</div>
 					</div>
 					<div class="col-md-4">
 						<div class="btn-group btn-group-xs">
-						  <button type="button" class="btn btn-success">BTC USD</button>
+							<button type="button" class="btn btn-default"
+						  		ng-class=""
+						  		ng-click="setSymbol(symbol)"
+						  		ng-repeat="symbol in symbols">{{symbol.name}}</button>
+						  <!-- <button type="button" class="btn btn-success">BTC USD</button>
 						  <button type="button" class="btn btn-default">BTC EUR</button>
 						  <button type="button" class="btn btn-default">LTC BTC</button>
 						  <button type="button" class="btn btn-default">LTC EUR</button>
-						  <button type="button" class="btn btn-default">LTC USD</button>
+						  <button type="button" class="btn btn-default">LTC USD</button> -->
 						</div>
 					</div>
 				</div>

@@ -1,5 +1,9 @@
 var Btce    = require('btce'),
+    Logger  = require('./logger'),
+    config  = require('./config'),
     Events  = require('events');
+
+var logger = Logger(module, config.logging.ticker);    
 
 var BtceTicker = function (pair, freq) {
   var that = this;
@@ -23,6 +27,7 @@ BtceTicker.prototype.query = function() {
 };
 
 BtceTicker.prototype.cancel = function() {
+  logger.info('cancelling ticker for', this.pair);
   clearTimeout(this.handler);
 };
 
