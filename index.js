@@ -17,9 +17,6 @@ var http = http.createServer(function (request, response) {
 var io = socket.listen(http, { log: false });
 var query = new Query.Query(config);
 
-// var handle = setInterval();
-
-
 io.sockets.on('connection', function (socket) {
   logger.info('new client connected');
 
@@ -28,9 +25,18 @@ io.sockets.on('connection', function (socket) {
     symbols: config.symbols
   });
 
-  socket.on('update', function (req) {
-
+  socket.on('update', function (state) {
+    logger.info('client asked for update', state);
+    var result = query.get_range(state.symbol.pair, state.range.name);
+    result
+      .then(function(data) {
+        socket.emit('update', data);
+      })
+      .catch(function(err){
+        logger.error(err.toString());
+      });
   });
+
 });
 
 process.on('SIGINT', function() {

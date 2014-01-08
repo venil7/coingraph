@@ -6,10 +6,14 @@ module.exports = function(grunt){
 
         pkg: grunt.file.readJSON('package.json'),
 
+        appConfig: grunt.file.readJSON('config.json'),
+
         uglify: {
           options: {
             banner: '\n/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-                    '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                    '<%= grunt.template.today("yyyy-mm-dd") %> */\n'/*,
+            sourceMap: 'dist/scripts/app.js.map',
+            sourceMappingURL: '/scripts/app.js.map'*/
           },
           prod: {
             files: {
@@ -17,6 +21,17 @@ module.exports = function(grunt){
                 [ 'web/scripts/*.js' ]
             }
           },
+          dev: {
+            options: {
+              compress: false,
+              beautify: true,
+              drop_console: false
+            },
+            files: {
+              'dist/scripts/app.js':
+                [ 'web/scripts/*.js' ]
+            }
+          }
         },
 
         replace: {
@@ -80,12 +95,12 @@ module.exports = function(grunt){
         watch: {
           js: {
             files: ['web/scripts/*.js'],
-            tasks: ['prod-js']
+            tasks: ['uglify:dev']
           },
 
           less: {
             files: ['web/style/*.less'],
-            tasks: ['prod-css']
+            tasks: ['less']
           },
 
           html: {
@@ -120,22 +135,21 @@ module.exports = function(grunt){
         }
     });
 
-    grunt.registerTask('prod-js', ['uglify:prod']);
-    grunt.registerTask('prod-css', ['less:prod']);
+    
     grunt.registerTask('build', [
       'clean:dist',
       'copy:web-images',
       'copy:html',
       'copy:bower',
-      'prod-js',
-      'prod-css']);
+      'uglify:dev',
+      'less']);
     grunt.registerTask('build-prod', [
       'clean:dist',
       'copy:web-images',
       'replace:prod-html',
       'copy:bower',
-      'prod-js',
-      'prod-css']);
+      'uglify:prod',
+      'less']);
 
     grunt.registerTask('dev', [
       'build',

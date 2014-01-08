@@ -19,37 +19,28 @@
 					</div>
 				</div>
 				<div id="chart">
-					<!-- <canvas linechart options="options" data="chart" width="920" height="400"></canvas> -->
+					<canvas linechart options="chartOptions" data="chartData" width="920" height="400"></canvas>
 				</div>
 				<div class="row">
 					<div class="col-md-6 col-md-offset-1">
 						<div class="btn-group btn-group-xs">
-						  <button type="button" class="btn btn-default"
-						  		ng-class=""
-						  		ng-click="setRange(range)"
-						  		ng-repeat="range in ranges">{{range.name}}</button>
-
-						  <!-- <button type="button" class="btn btn-success">1 month</button>
-						  <button type="button" class="btn btn-default">1 week</button>
-						  <button type="button" class="btn btn-default">1 day</button>
-						  <button type="button" class="btn btn-default">12 Hours</button>
-						  <button type="button" class="btn btn-default">6 Hours</button>
-						  <button type="button" class="btn btn-default">3 Hours</button>
-						  <button type="button" class="btn btn-default">1 Hour</button>
-						  <button type="button" class="btn btn-default">10 mins</button> -->
+				  		<button type="button" class="btn btn-default"
+					  		ng-repeat="(i, range) in ranges"
+					  		ng-click="$parent.state.range = range"
+					  		ng-class="{'btn-success': range == $parent.state.range}">
+					  			{{range.name}}
+						  </button>
 						</div>
 					</div>
+
 					<div class="col-md-4">
 						<div class="btn-group btn-group-xs">
 							<button type="button" class="btn btn-default"
-						  		ng-class=""
-						  		ng-click="setSymbol(symbol)"
-						  		ng-repeat="symbol in symbols">{{symbol.name}}</button>
-						  <!-- <button type="button" class="btn btn-success">BTC USD</button>
-						  <button type="button" class="btn btn-default">BTC EUR</button>
-						  <button type="button" class="btn btn-default">LTC BTC</button>
-						  <button type="button" class="btn btn-default">LTC EUR</button>
-						  <button type="button" class="btn btn-default">LTC USD</button> -->
+					  		ng-repeat="(i, symbol) in symbols"
+					  		ng-click="$parent.state.symbol = symbol"
+					  		ng-class="{'btn-success': symbol == $parent.state.symbol}">
+					  			{{symbol.name}}
+			  			</button>
 						</div>
 					</div>
 				</div>
@@ -65,7 +56,7 @@
 	<script src="scripts/angular.min.js" production-src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
 	<script src="scripts/chart.min.js"></script>
 	<script src="scripts/angles.js"></script>
-	<script src="scripts/app.min.js"></script>
+	<script src="scripts/app.js" production-src="scripts/app.min.js"></script>
 
 </body>
 </html>

@@ -16,45 +16,76 @@ coingraph.factory('Socket', ['$rootScope', function($rootScope) {
   };
 }]);
 
-coingraph.factory('dataAdapter', function() {
+coingraph.factory('chartAdapter', function() {
   return {
-    adapt: function(data) {
-      return data;
+    options: {
+        pointDot: false,
+        animation: false,
+        bezierCurve: false,
+        scaleLabel: "<%=value%>",
+        scaleFontFamily: "'Arial'",
+        scaleFontSize: 12
+    },
+    prepare: function(data) {
+      var ret = {};
+      ret.labels = data.map(function(x) { return x.value.time; });
+      ret.datasets = [
+        {
+          fillColor : "rgba(251,187,205,0)",
+          strokeColor : "MediumBlue",
+          pointColor : "rgba(151,187,205,0)",
+          pointStrokeColor : "MediumBlue",
+          data : data.map(function(x) { return x.value.avg; })
+        },
+        {
+          fillColor : "rgba(151,187,205,0)",
+          strokeColor : "DarkOrange",
+          pointColor : "rgba(151,187,205,0)",
+          pointStrokeColor : "DarkOrange",
+          data : data.map(function(x) { return x.value.high; })
+        },
+        {
+          fillColor : "rgba(151,187,205,0)",
+          strokeColor : "DarkCyan",
+          pointColor : "rgba(151,187,205,0)",
+          pointStrokeColor : "DarkCyan",
+          data : data.map(function(x) { return x.value.low; })
+        }
+      ];
+      return ret;
     }
   };
 });
 
-coingraph.controller('chartController', ['$scope', 'Socket', 'dataAdapter', function($scope, Socket, dataAdapter) {
+coingraph.controller('chartController', ['$scope', 'Socket', 'chartAdapter', function($scope, Socket, chartAdapter) {
+
     var socket = Socket($scope);
 
+    $scope.chartOptions = chartAdapter.options;
+
     socket.on('welcome', function(data) {
-      console.log(data);
       $scope.symbols = data.symbols;
       $scope.ranges = data.ranges;
+
+      // defaulting to first symbol and range:
+      $scope.state = { 
+        symbol: $scope.symbol || $scope.symbols[0],
+        range: $scope.range || $scope.ranges[0]
+      };
     });
 
-    // $scope.options = {
-    //     animation : false
-    // }
-    // $scope.chart = {
-    //     //labels : ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    //     //labels: ["one","","","","four","","","","eight","","","","twelve"],
-    //     labels: new Array(1000),
-    //     datasets : [
-    //         {
-    //             fillColor : "rgba(151,187,205,0.5)",
-    //             strokeColor : "#e67e22",
-    //             pointColor : "rgba(151,187,205,0)",
-    //             pointStrokeColor : "#e67e22",
-    //             data : new Array(1000),
-    //         },
-    //         {
-    //             fillColor : "rgba(151,187,205,0.7)",
-    //             strokeColor : "#f1c40f",
-    //             pointColor : "rgba(151,187,205,0)",
-    //             pointStrokeColor : "#f1c40f",
-    //             data : new Array(1000),
-    //         }
-    //     ],
-    // };
+    socket.on('update', function(data) {
+      // console.log("data came back", data);
+      $scope.chartData = chartAdapter.prepare(data);
+    });
+
+    var stateChanged = function(newVal, oldVal) {
+      if ($scope.state) {
+        // console.log("time to update", $scope.state);
+        socket.emit('update', $scope.state);
+      }
+    };
+
+    $scope.$watch('state', stateChanged, true);
+
 }]);

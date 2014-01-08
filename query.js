@@ -21,8 +21,8 @@ Query.prototype.getPairArray = function () {
 Query.prototype.get = function (pair, aggr, range) {
   var that = this;
   var allowedPairs = this.getPairArray();
-  if (!~allowedPairs.indexOf(pair)) { throw new Error("pair is not configured."); }
-  if (!~["hour", "day", "minute"].indexOf(aggr)) { throw new Error("aggregate func is not configured."); }
+  if (!~allowedPairs.indexOf(pair)) { return Q.reject(new Error("pair is not configured.")); }
+  if (!~["hour", "day", "minute"].indexOf(aggr)) { Q.reject(new Error("aggregate func is not configured.")); }
 
   var now = +new Date(),
       yesterday = now - 60 * 60 * 24 * 1000;
@@ -46,9 +46,9 @@ Query.prototype.get = function (pair, aggr, range) {
 Query.prototype.get_range = function(pair, range) {
   var allRanges = config.ranges.map(function(x) { return x.name; } );
   var idx = allRanges.indexOf(range);
-  if (!~idx) { throw new Error("range is not configured."); }
+  if (!~idx) { return Q.reject(new Error("range is not configured.")); }
   var range = config.ranges[idx];
-  return this.get(pair, range.aggr, range.range);
+  return this.get(pair, range.aggr, +new Date() - range.range);
 };
 
 Query.prototype.close = function () {
@@ -65,19 +65,19 @@ module.exports = {
 var MAP = {
   minute: function() {
     var minute = 1000 * 60;
-    var key = new Date(Math.floor(this.server_time / minute) * minute);
+    var key = +new Date(Math.floor(this.server_time / minute) * minute);
     emit(key, this);
   },
 
   hour: function() {
     var hour = 1000 * 60 *60;
-    var key = new Date(Math.floor(this.server_time / hour) * hour);
+    var key = +new Date(Math.floor(this.server_time / hour) * hour);
     emit(key, this);
   },
 
   day: function() {
     var day = 1000 * 60 *60 * 24;
-    var key = new Date(Math.floor(this.server_time / day) * day);
+    var key = +new Date(Math.floor(this.server_time / day) * day);
     emit(key, this);
   },
 
