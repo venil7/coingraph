@@ -14,9 +14,10 @@
     "tests"
   ],
   "dependencies": {
-    "angles": "*",
-    "bootstrap": "~3.0.3",
-    "Chart.js": "*"
+    "angular": "~1.2.7",
+    "d3": "~3.3.13",
+    "n3-charts-line-chart": "https://github.com/n3-charts/line-chart.git#~1.0.2",
+    "momentjs": "~2.5.0"
   },
-  "private": true
+  "homepage": "https://github.com/venil7/coingraph"
 }

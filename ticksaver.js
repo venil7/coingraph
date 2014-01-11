@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 var Mongodb = require('mongodb'),
     Events  = require('events'),
     Q       = require('q'),

@@ -79,8 +79,9 @@ module.exports = function(grunt){
             files: [
               { expand: true, cwd: 'bower_components/bootstrap/dist/css/', src: ['bootstrap.min.css'], dest: 'dist/styles/', filter: 'isFile' },
               { expand: true, cwd: 'bower_components/angular/', src: ['angular.min.js'], dest: 'dist/scripts/', filter: 'isFile' },
-              { expand: true, cwd: 'bower_components/angles/libs/', src: ['angles.js'], dest: 'dist/scripts/', filter: 'isFile' },
-              { src: 'bower_components/Chart.js/Chart.min.js', dest: 'dist/scripts/chart.min.js' },
+              { expand: true, cwd: 'bower_components/d3/', src: ['d3.min.js'], dest: 'dist/scripts/', filter: 'isFile' },
+              { expand: true, cwd: 'bower_components/n3-charts-line-chart/dist/', src: ['line-chart.min.js'], dest: 'dist/scripts/', filter: 'isFile' },
+              { expand: true, cwd: 'bower_components/momentjs/min/', src: ['moment.min.js'], dest: 'dist/scripts/', filter: 'isFile' },
             ]
           }
 
@@ -135,7 +136,7 @@ module.exports = function(grunt){
         }
     });
 
-    
+
     grunt.registerTask('build', [
       'clean:dist',
       'copy:web-images',

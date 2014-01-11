@@ -1,4 +1,4 @@
-var coingraph = angular.module("coingraph", ['angles']);
+var coingraph = angular.module("coingraph", ['n3-charts.linechart']);
 
 coingraph.factory('Socket', ['$rootScope', function($rootScope) {
   var socket = io.connect();
@@ -16,48 +16,66 @@ coingraph.factory('Socket', ['$rootScope', function($rootScope) {
   };
 }]);
 
-coingraph.factory('chartAdapter', function() {
+coingraph.constant('moment', moment);
+
+coingraph.factory('storage', function(){
+  localStorage = localStorage || {};
+  return {
+    set: function(name, value) {
+      if (typeof value === "object") {
+        value = "\x00" + JSON.stringify(value);
+      } else if (typeof value == "number") {
+        value = "\x01" + value.toString();
+      }
+      localStorage[name] = value;
+    },
+    get: function(name) {
+      var value = localStorage[name];
+      if (value) {
+        if (value[0] == "\x00") {
+          value = value.substring(1);
+          return JSON.parse(value);
+        }
+        if (value[0] == "\x01") {
+          value = value.substring(1);
+          return parseInt(value, 10);
+        }
+      }
+      return value;
+    }
+  }
+});
+
+coingraph.factory('chartAdapter', ['moment', function(moment) {
   return {
     options: {
-        pointDot: false,
-        animation: false,
-        bezierCurve: false,
-        scaleLabel: "<%=value%>",
-        scaleFontFamily: "'Arial'",
-        scaleFontSize: 12
+      axes: {
+        x:  { key: 'time', labelFunction: function(x) { return moment(x).format("HH:mm"); }, type: 'linear'/*, tooltipFormatter: function(x) {return new Date(x); } */},
+        y:  { type: 'linear'},
+        y2: { type: 'linear'}
+      },
+      series: [
+        { y: 'buy', color: 'red', type: 'line', label: 'Buy'},
+        { y: 'sell', color: 'green', type: 'line', label: 'Sell'},
+        { y: 'vol', color: 'SpringGreen', type: 'area', label: 'Volume', axis: 'y2'}
+      ],
+      lineMode: 'cardinal'
     },
     prepare: function(data) {
-      var ret = {};
-      ret.labels = data.map(function(x) { return x.value.time; });
-      ret.datasets = [
-        {
-          fillColor : "rgba(251,187,205,0)",
-          strokeColor : "MediumBlue",
-          pointColor : "rgba(151,187,205,0)",
-          pointStrokeColor : "MediumBlue",
-          data : data.map(function(x) { return x.value.avg; })
-        },
-        {
-          fillColor : "rgba(151,187,205,0)",
-          strokeColor : "DarkOrange",
-          pointColor : "rgba(151,187,205,0)",
-          pointStrokeColor : "DarkOrange",
-          data : data.map(function(x) { return x.value.high; })
-        },
-        {
-          fillColor : "rgba(151,187,205,0)",
-          strokeColor : "DarkCyan",
-          pointColor : "rgba(151,187,205,0)",
-          pointStrokeColor : "DarkCyan",
-          data : data.map(function(x) { return x.value.low; })
-        }
-      ];
+      // console.log(data);
+      var ret = data.map(function(v) {
+        v.value.time = new Date(v.value.time);
+        return v.value;
+      });
+      // console.log(ret);
       return ret;
     }
   };
-});
+}]);
 
-coingraph.controller('chartController', ['$scope', 'Socket', 'chartAdapter', function($scope, Socket, chartAdapter) {
+coingraph.controller('chartController',
+  ['$scope', 'Socket', 'chartAdapter', 'storage',
+    function($scope, Socket, chartAdapter, storage) {
 
     var socket = Socket($scope);
 
@@ -68,9 +86,12 @@ coingraph.controller('chartController', ['$scope', 'Socket', 'chartAdapter', fun
       $scope.ranges = data.ranges;
 
       // defaulting to first symbol and range:
-      $scope.state = { 
-        symbol: $scope.symbol || $scope.symbols[0],
-        range: $scope.range || $scope.ranges[0]
+      var stateIdx = storage.get('stateIdx');
+      var symbolIdx = stateIdx && ~stateIdx.symbol ? stateIdx.symbol : 0;
+      var rangeIdx = stateIdx && ~stateIdx.range ? stateIdx.range : 0;
+      $scope.state = {
+        symbol: $scope.symbols[symbolIdx],
+        range: $scope.ranges[rangeIdx],
       };
     });
 
@@ -81,7 +102,10 @@ coingraph.controller('chartController', ['$scope', 'Socket', 'chartAdapter', fun
 
     var stateChanged = function(newVal, oldVal) {
       if ($scope.state) {
-        // console.log("time to update", $scope.state);
+        storage.set('stateIdx', {
+          symbol: $scope.symbols.indexOf($scope.state.symbol),
+          range: $scope.ranges.indexOf($scope.state.range),
+        });
         socket.emit('update', $scope.state);
       }
     };

@@ -33,13 +33,14 @@ Query.prototype.get = function (pair, aggr, range) {
   var lte = Math.max.apply(null, range);
   var query = { server_time: { $gte: gte, $lte: lte } };
   var map = MAP[aggr];
+  var reduce = MAP.reduce;
   logger.info('querying', query);
 
   return this.db
     .then(function(db) {
       var collection = db.collection(pair);
       that.emit('get', pair);
-      return Q.nfcall(collection.mapReduce.bind(collection), map, MAP.reduce, { out: { inline: 1 }, query: query });
+      return Q.nfcall(collection.mapReduce.bind(collection), map, reduce, { out: { inline: 1 }, query: query });
     });
 };
 
@@ -65,33 +66,47 @@ module.exports = {
 var MAP = {
   minute: function() {
     var minute = 1000 * 60;
-    var key = +new Date(Math.floor(this.server_time / minute) * minute);
-    emit(key, this);
+    var key = (Math.floor(this.server_time / minute) * minute);
+    var value = { time: key, buy: this.buy, sell: this.sell, avg: this.avg, vol: this.vol };
+    emit(key, value);
   },
 
   hour: function() {
     var hour = 1000 * 60 *60;
-    var key = +new Date(Math.floor(this.server_time / hour) * hour);
-    emit(key, this);
+    var key = (Math.floor(this.server_time / hour) * hour);
+    var value = { time: key, buy: this.buy, sell: this.sell, avg: this.avg, vol: this.vol };
+    emit(key, value);
   },
 
   day: function() {
     var day = 1000 * 60 *60 * 24;
-    var key = +new Date(Math.floor(this.server_time / day) * day);
-    emit(key, this);
+    var key = (Math.floor(this.server_time / day) * day);
+    var value = { time: key, buy: this.buy, sell: this.sell, avg: this.avg, vol: this.vol };
+    emit(key, value);
   },
 
   reduce: function(key, values) {
-      var all_highs = values.map(function(v) { return v.high || 0 });
-      var all_lows = values.map(function(v) { return v.low || 0 });
-      var all_avgs = values.map(function(v) { return v.avg || 0 });
-      var all_vols = values.map(function(v) { return v.vol || 0 });
+      var all_highs = [],
+          all_lows = [],
+          all_avgs = [],
+          all_buys = [],
+          all_sells = [];
+          all_vols = [];
 
-      var high = Math.max.apply(null, all_highs);
-      var low = Math.max.apply(null, all_lows);
+      values.forEach(function (v) {
+        all_buys.push(v.buy || 0);
+        all_sells.push(v.sell || 0);
+        all_avgs.push(v.avg || 0);
+        all_vols.push(v.vol || 0);
+      });
+
+      // var high = Math.max.apply(null, all_highs);
+      // var low = Math.max.apply(null, all_lows);
+      var buy = Array.avg(all_buys);
+      var sell = Array.avg(all_sells);
       var avg = Array.avg(all_avgs);
-      var vol = Array.avg(all_vols);
+      var vol = Math.max.apply(null, all_vols);
 
-      return { time: key, high: high, low: low, avg: avg, vol: vol };
+      return { time: key, buy: buy, sell: sell, avg: avg, vol: vol };
   }
 };

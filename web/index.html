@@ -19,7 +19,7 @@
 					</div>
 				</div>
 				<div id="chart">
-					<canvas linechart options="chartOptions" data="chartData" width="920" height="400"></canvas>
+					<linechart data="chartData" options="chartOptions"></linechart>
 				</div>
 				<div class="row">
 					<div class="col-md-6 col-md-offset-1">
@@ -27,7 +27,7 @@
 				  		<button type="button" class="btn btn-default"
 					  		ng-repeat="(i, range) in ranges"
 					  		ng-click="$parent.state.range = range"
-					  		ng-class="{'btn-success': range == $parent.state.range}">
+					  		ng-class="{ 'btn-success': range == $parent.state.range }">
 					  			{{range.name}}
 						  </button>
 						</div>
@@ -38,7 +38,7 @@
 							<button type="button" class="btn btn-default"
 					  		ng-repeat="(i, symbol) in symbols"
 					  		ng-click="$parent.state.symbol = symbol"
-					  		ng-class="{'btn-success': symbol == $parent.state.symbol}">
+					  		ng-class="{ 'btn-success': symbol == $parent.state.symbol }">
 					  			{{symbol.name}}
 			  			</button>
 						</div>
@@ -54,8 +54,11 @@
 
 	<script src="socket.io/socket.io.js"></script>
 	<script src="scripts/angular.min.js" production-src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js"></script>
-	<script src="scripts/chart.min.js"></script>
-	<script src="scripts/angles.js"></script>
+	<!-- <script src="scripts/chart.min.js"></script> -->
+	<!-- <script src="scripts/angles.js"></script> -->
+	<script src="scripts/d3.min.js"></script>
+	<script src="scripts/line-chart.min.js"></script>
+	<script src="scripts/moment.min.js"></script>
 	<script src="scripts/app.js" production-src="scripts/app.min.js"></script>
 
 </body>
