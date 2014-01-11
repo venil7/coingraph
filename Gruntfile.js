@@ -39,12 +39,12 @@ module.exports = function(grunt){
             options: {
               patterns: [
                 {
-                  match: /(src=["']{1}(.*)["']{1}\s+production-src=["']{1}(.*)["']{1})/,
+                  match: /(src=["']{1}(.*)["']{1}\s+production-src=["']{1}(.*)["']{1})/ig,
                   replacement: "src=\"$3\"",
                   expression: true
                 },
                 {
-                  match: /(href=["']{1}(.*)["']{1}\s+production-href=["']{1}(.*)["']{1})/,
+                  match: /(href=["']{1}(.*)["']{1}\s+production-href=["']{1}(.*)["']{1})/ig,
                   replacement: "href=\"$3\"",
                   expression: true
                 }
