@@ -57,7 +57,7 @@ coingraph.factory('chartAdapter', ['moment', function(moment) {
       series: [
         { y: 'buy', color: 'red', type: 'line', label: 'Buy'},
         { y: 'sell', color: 'green', type: 'line', label: 'Sell'},
-        { y: 'vol', color: 'SpringGreen', type: 'area', label: 'Volume', axis: 'y2'}
+        { y: 'vol', color: 'DodgerBlue', type: 'area', striped: true, label: 'Volume', axis: 'y2'}
       ],
       lineMode: 'cardinal'
     },
