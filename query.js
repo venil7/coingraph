@@ -22,7 +22,8 @@ Query.prototype.get = function (pair, aggr, range) {
   var that = this;
   var allowedPairs = this.getPairArray();
   if (!~allowedPairs.indexOf(pair)) { return Q.reject(new Error("pair is not configured.")); }
-  if (!~["hour", "day", "minute"].indexOf(aggr)) { Q.reject(new Error("aggregate func is not configured.")); }
+  // if (!~["hour", "day", "minute"].indexOf(aggr)) { Q.reject(new Error("aggregate func is not configured.")); }
+  if (!~Object.keys(MAP).filter(function(n){return n!=="reduce"}).indexOf(aggr)) { return Q.reject(new Error("aggregate func is not configured.")); }
 
   var now = +new Date(),
       yesterday = now - 60 * 60 * 24 * 1000;
@@ -71,9 +72,37 @@ var MAP = {
     emit(key, value);
   },
 
+  fiveminute: function() {
+    var fiveminute = 1000 * 60 * 5;
+    var key = (Math.floor(this.server_time / fiveminute) * fiveminute);
+    var value = { time: key, buy: this.buy, sell: this.sell, avg: this.avg, vol: this.vol };
+    emit(key, value);
+  },
+
+  tenminute: function() {
+    var tenminute = 1000 * 60 * 10;
+    var key = (Math.floor(this.server_time / tenminute) * tenminute);
+    var value = { time: key, buy: this.buy, sell: this.sell, avg: this.avg, vol: this.vol };
+    emit(key, value);
+  },
+
+  halfhour: function() {
+    var halfhour = 1000 * 60 * 30;
+    var key = (Math.floor(this.server_time / halfhour) * halfhour);
+    var value = { time: key, buy: this.buy, sell: this.sell, avg: this.avg, vol: this.vol };
+    emit(key, value);
+  },
+
   hour: function() {
-    var hour = 1000 * 60 *60;
+    var hour = 1000 * 60 * 60;
     var key = (Math.floor(this.server_time / hour) * hour);
+    var value = { time: key, buy: this.buy, sell: this.sell, avg: this.avg, vol: this.vol };
+    emit(key, value);
+  },
+
+  threehour: function() {
+    var threehour = 1000 * 60 * 60 * 3;
+    var key = (Math.floor(this.server_time / threehour) * threehour);
     var value = { time: key, buy: this.buy, sell: this.sell, avg: this.avg, vol: this.vol };
     emit(key, value);
   },
