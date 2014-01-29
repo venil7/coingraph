@@ -8,6 +8,9 @@ var static = require('node-static'),
 var logger = Logger(module, config.logging.web);
 var staticServer = new static.Server(config.web.public, { cache: config.web.cache || 7200 });
 
+var port = config.web.port || 3000;
+var host = config.web.host || "localhost";
+
 var http = http.createServer(function (request, response) {
   staticServer.serve(request, response, function (err, res) {
     if (err) {
@@ -16,10 +19,12 @@ var http = http.createServer(function (request, response) {
       response.end();
     }
   });
-}).listen(config.web.port || 3000, config.web.host || "localhost");
+}).listen(port, host);
 
 var io = socket.listen(http, { log: false });
 var query = new Query.Query(config);
+
+logger.info("app started on", host, port);
 
 io.sockets.on('connection', function (socket) {
   logger.info('new client connected');

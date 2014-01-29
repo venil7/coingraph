@@ -1,17 +1,20 @@
 #! /usr/bin/env node
 
 var Mongodb = require('mongodb'),
-    Events  = require('events'),
     Q       = require('q'),
+    Events  = require('events'),
+    lodash  = require('lodash'),
     Ticker  = require('./ticker'),
     config  = require('./config'),
+    connect = require('./ft-connect'),
     Logger  = require('./logger');
 
 var logger = Logger(module, config.logging.ticker);
+var ftConnectMixin = connect(Q, Mongodb, config, logger);
 
 var TickSaver = function(config) {
-  config = config || {};
   var that = this;
+  this.config = config || {};
   this.tickers = [];
   if (config.symbols.length) {
     config.symbols.forEach(function(symbol, index, arr) {
@@ -19,14 +22,14 @@ var TickSaver = function(config) {
       ticker.on('tick', that.tickHandler.bind(that));
       that.tickers.push(ticker);
     });
-    this.db = Q.nfcall(Mongodb.connect.bind(Mongodb), config.mongoServer);
+    lodash.mixin(this, ftConnectMixin);
   };
 };
 
 TickSaver.prototype = Object.create(Events.EventEmitter.prototype);
 
 TickSaver.prototype.save = function(pairData, pair) {
-    this.db
+    this.db()
     .then(function(db) {
       var collection = db.collection(pair);
       pairData.server_time *= 1000;
@@ -52,7 +55,7 @@ TickSaver.prototype.shutdown = function() {
     var ticker = this.tickers[i];
     ticker.cancel();
   }
-  this.db.then(function(db){
+  this.db().then(function(db){
     db.close();
   });
 };

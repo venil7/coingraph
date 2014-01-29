@@ -1,38 +1,20 @@
 var Mongodb = require('mongodb'),
     Q       = require('q'),
     Events  = require('events'),
+    lodash  = require('lodash'),
     Logger  = require('./logger'),
+    connect = require('./ft-connect'),
     config  = require('./config');
 
 var logger = Logger(module, config.logging.web);
+var ftConnectMixin = connect(Q, Mongodb, config, logger);
 
 var Query = function(config) {
-  var that = this;
+  this.config = config || {};
+  lodash.mixin(this, ftConnectMixin);
 };
 
 Query.prototype = Object.create(Events.EventEmitter.prototype);
-
-Query.prototype.db = function () {
-  if (!!this._db) { return this._db; }
-
-  var that = this;
-  logger.info('attempting to (re)connect to', config.mongoServer);
-  this._db = Q.nfcall(Mongodb.connect.bind(Mongodb), config.mongoServer)
-    .then(function (db) {
-      db.on('close', function () {
-        logger.info('disconnected from', config.mongoServer);
-        that._db = null;
-      });
-      return db;
-    })
-    .catch(function (e) {
-      logger.info('failed to connect to', config.mongoServer);
-      that._db = null;
-      return Q.reject(new Error("Failed to connect to mongodb"));
-    });
-
-  return this._db;
-};
 
 Query.prototype.get = function (pair, aggr, range) {
   var that = this;

@@ -47,14 +47,18 @@ coingraph.factory('storage', function(){
 });
 
 coingraph.factory('chartAdapter', ['moment', function(moment) {
-  var format = function(x) {
+  var full = function(x) {
     return moment(x).format("D MMM HH:mm");
+  };
+
+  var hour = function(x) {
+    return moment(x).format("HH:mm");
   };
 
   return {
     options: {
       axes: {
-        x:  { key: 'time', labelFunction: format, type: 'linear', tooltipFormatter: format },
+        x:  { key: 'time', labelFunction: hour, type: 'linear', tooltipFormatter: full },
         y:  { type: 'linear'},
         y2: { type: 'linear'}
       },
