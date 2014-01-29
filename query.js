@@ -8,22 +8,37 @@ var logger = Logger(module, config.logging.web);
 
 var Query = function(config) {
   var that = this;
-  logger.info('attempting to connect to', config.mongoServer);
-  this.db = Q.nfcall(Mongodb.connect.bind(Mongodb), config.mongoServer);
 };
 
 Query.prototype = Object.create(Events.EventEmitter.prototype);
 
-Query.prototype.getPairArray = function () {
-  return config.symbols.map(function(x) { return x.pair; });
+Query.prototype.db = function () {
+  if (!!this._db) { return this._db; }
+
+  var that = this;
+  logger.info('attempting to (re)connect to', config.mongoServer);
+  this._db = Q.nfcall(Mongodb.connect.bind(Mongodb), config.mongoServer)
+    .then(function (db) {
+      db.on('close', function () {
+        logger.info('disconnected from', config.mongoServer);
+        that._db = null;
+      });
+      return db;
+    })
+    .catch(function (e) {
+      logger.info('failed to connect to', config.mongoServer);
+      that._db = null;
+      return Q.reject(new Error("Failed to connect to mongodb"));
+    });
+
+  return this._db;
 };
 
 Query.prototype.get = function (pair, aggr, range) {
   var that = this;
-  var allowedPairs = this.getPairArray();
+  var allowedPairs = config.symbols.map(function(x) { return x.pair; });
   if (!~allowedPairs.indexOf(pair)) { return Q.reject(new Error("pair is not configured.")); }
-  // if (!~["hour", "day", "minute"].indexOf(aggr)) { Q.reject(new Error("aggregate func is not configured.")); }
-  if (!~Object.keys(MAP).filter(function(n){return n!=="reduce"}).indexOf(aggr)) { return Q.reject(new Error("aggregate func is not configured.")); }
+  if (!~Object.keys(MAP).filter(function(n){ return n!=="reduce" }).indexOf(aggr)) { return Q.reject(new Error("aggregate func is not configured.")); }
 
   var now = +new Date(),
       yesterday = now - 60 * 60 * 24 * 1000;
@@ -37,7 +52,7 @@ Query.prototype.get = function (pair, aggr, range) {
   var reduce = MAP.reduce;
   logger.info('querying', query);
 
-  return this.db
+  return this.db()
     .then(function(db) {
       var collection = db.collection(pair);
       that.emit('get', pair);
@@ -54,7 +69,7 @@ Query.prototype.get_range = function(pair, range) {
 };
 
 Query.prototype.close = function () {
-  this.db
+  this.db()
       .then(function(db){
         db.close();
       });
