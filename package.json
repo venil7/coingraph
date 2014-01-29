@@ -14,7 +14,8 @@
     "node-static": "~0.7.2",
     "q": "~0.9.7",
     "winston": "~0.7.2",
-    "socket.io": "~0.9.16"
+    "socket.io": "~0.9.16",
+    "lodash": "~2.4.1"
   },
   "devDependencies": {
     "matchdep": "*",
