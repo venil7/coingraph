@@ -75,6 +75,9 @@ module.exports = function(grunt){
           html: {
             files: [ { expand: true, cwd: 'web/', src: ['*.html'], dest: 'dist/', filter: 'isFile' } ]
           },
+          ico: {
+            files: [ { expand: true, cwd: 'web/', src: ['favicon.ico'], dest: 'dist/', filter: 'isFile' } ]
+          },
           bower: {
             files: [
               { expand: true, cwd: 'bower_components/bootstrap/dist/css/', src: ['bootstrap.min.css'], dest: 'dist/styles/', filter: 'isFile' },
@@ -131,7 +134,7 @@ module.exports = function(grunt){
 
         open : {
           dev : {
-            path: 'http://localhost:3000/'
+            path: 'http://localhost:3030/'
           }
         }
     });
@@ -139,16 +142,16 @@ module.exports = function(grunt){
 
     grunt.registerTask('build', [
       'clean:dist',
-      'copy:web-images',
-      'copy:html',
-      'copy:bower',
+      'copy',
       'uglify:dev',
       'less']);
+
     grunt.registerTask('build-prod', [
       'clean:dist',
       'copy:web-images',
       'replace:prod-html',
       'copy:bower',
+      'copy:ico',
       'uglify:prod',
       'less']);
 
