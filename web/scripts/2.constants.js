@@ -1,0 +1,1 @@
+coingraph.constant('moment', moment);
