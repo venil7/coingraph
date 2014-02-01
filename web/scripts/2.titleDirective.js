@@ -10,7 +10,6 @@ coingraph.directive('coinTitle',
           scope.symbol = exchange.symbol;
           exchange.on('symbol', function(undefined, symbol){
             scope.symbol = symbol;
-            console.log(scope.symbol);
           });
         }
       };

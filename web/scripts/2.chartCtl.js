@@ -4,7 +4,7 @@ coingraph.controller('chartCtl',
 
     var socket = Socket($scope);
 
-    $scope.chartOptions = chartAdapter.options;
+    // $scope.chartOptions = chartAdapter.options;
 
     socket.on('welcome', function(data) {
       $scope.symbols = data.symbols;
@@ -21,9 +21,8 @@ coingraph.controller('chartCtl',
     });
 
     socket.on('update', function(data) {
-      // console.log("data came back", data);
+      $scope.chartOptions = chartAdapter.options();
       $scope.chartData = chartAdapter.prepare(data);
-      exchange.update('symbol', $scope.state.symbol);
     });
 
     var stateChanged = function(newVal, oldVal) {
@@ -33,6 +32,8 @@ coingraph.controller('chartCtl',
           range: $scope.ranges.indexOf($scope.state.range),
         });
         socket.emit('update', $scope.state);
+        exchange.update('symbol', $scope.state.symbol);
+        exchange.update('range', $scope.state.range);
       }
     };
 
