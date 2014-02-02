@@ -1,36 +1,19 @@
-// var Ticker = require('./ticker')
-// var ticker1 = new Ticker.BtceTicker('btc_usd');
-// var ticker2 = new Ticker.BtceTicker('ltc_eur');
-
-// ticker1.on('tick', function(e,d){
-//   if(e) console.log(e);
-//   if(d) console.log('1:', d.server_time);
-// });
-
-// ticker2.on('tick', function(e,d){
-//   if(e) console.log(e);
-//   if(d) console.log('2: ',d.server_time);
-// });
-
-var Query = require("./query");
 var Q = require("q");
-var config = require("./config");
 var Mongodb = require('mongodb');
+var Query = require("../query");
+var config = require("../config");
 
 var query = new Query.Query(config);
 
-query.get("btc_usd", "hour", 0)
-     .then(function(data){
-        data.forEach(function(d){
-          console.log(d.value.time, d.value.avg);
-        });
-        query.close();
-     })
-     .catch(function(err){
-        console.log("error");
-        console.log(err);
-        query.close();
-     });
+query.get_latest_snapshot()
+  .then(function(array) {
+      console.log(array);
+    query.close();
+  })
+  .catch(function(err){
+    console.log("error:", err.toString());
+    query.close();
+  });
 
 // var minute_map = function() {
 //   var minute = 1000 * 60;

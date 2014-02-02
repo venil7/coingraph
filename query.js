@@ -12,14 +12,15 @@ var ftConnectMixin = connect(Q, Mongodb, config, logger);
 var Query = function(config) {
   this.config = config || {};
   lodash.mixin(this, ftConnectMixin);
+  this.allPairs = config.symbols.map(function(x) { return x.pair; });
+  this.allRanges = config.ranges.map(function(x) { return x.name; });
 };
 
 Query.prototype = Object.create(Events.EventEmitter.prototype);
 
 Query.prototype.get = function (pair, aggr, range) {
   var that = this;
-  var allowedPairs = config.symbols.map(function(x) { return x.pair; });
-  if (!~allowedPairs.indexOf(pair)) { return Q.reject(new Error("pair is not configured.")); }
+  if (!~this.allPairs.indexOf(pair)) { return Q.reject(new Error("pair is not configured.")); }
   if (!~Object.keys(MAP).filter(function(n){ return n!=="reduce" }).indexOf(aggr)) { return Q.reject(new Error("aggregate func is not configured.")); }
 
   var now = +new Date(),
@@ -37,18 +38,33 @@ Query.prototype.get = function (pair, aggr, range) {
   return this.db()
     .then(function(db) {
       var collection = db.collection(pair);
-      that.emit('get', pair);
       return Q.nfcall(collection.mapReduce.bind(collection), map, reduce, { out: { inline: 1 }, query: query });
     });
 };
 
 Query.prototype.get_range = function(pair, range) {
-  var allRanges = config.ranges.map(function(x) { return x.name; } );
-  var idx = allRanges.indexOf(range);
+  var idx = this.allRanges.indexOf(range);
   if (!~idx) { return Q.reject(new Error("range is not configured.")); }
   var range = config.ranges[idx];
   return this.get(pair, range.aggr, +new Date() - range.range);
 };
+
+Query.prototype.get_latest_snapshot = function () {
+  var that = this;
+  logger.info('getting latest snapshot');
+  return this.db()
+    .then(function(db){
+      var promises = that.allPairs.map(function(pair){
+        var collection = db.collection(pair);
+        return Q.nfcall(
+          collection.findOne.bind(collection), {}, {sort:{$natural:-1}});
+      });
+      return Q.all(promises)
+              .then(function(values){
+                return lodash.zipObject(that.allPairs, values);
+              });
+    });
+}
 
 Query.prototype.close = function () {
   this.db()
