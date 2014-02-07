@@ -78,7 +78,7 @@ mr_saver.start();
 process.on('SIGINT', function() {
   logger.info('disconnecting from', config.mongoServer);
   tick_saver.shutdown();
-  mr_saver.close();
+  mr_saver.stop();
   query.close();
   process.exit( );
 });

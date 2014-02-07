@@ -5,7 +5,7 @@
 	<link rel="stylesheet" href="styles/bootstrap.min.css" production-href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 	<link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Play' type='text/css'>
 	<link rel='stylesheet' href='styles/style.css' type='text/css'>
-	<title coin-title="CoinTracker">CoinTracker</title>
+	<title coin-title="CoinTracker"></title>
 </head>
 <body>
 
@@ -14,7 +14,7 @@
 		<div class="jumbotron" ng-controller="chartCtl">
 			<div class="row">
 				<div class="col-md-8 col-md-offset-1" ng-controller="instantUpdateCtl">
-					<h3 class="_3d">
+					<h3 class="_3d" ng-cloak>
 						{{state.symbol.name}}:
 						<span class="buy">{{latest[state.symbol.pair].buy | number:3}}</span>
 						<span class="sell">{{latest[state.symbol.pair].sell | number:3}}</span>

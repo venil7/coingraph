@@ -1,5 +1,4 @@
 var Mongodb = require('mongodb'),
-    // Q       = require('q'),
     Events  = require('events'),
     lodash  = require('lodash'),
     Logger  = require('./logger'),
@@ -27,7 +26,7 @@ MRRunner.prototype.start = function() {
     logger.info('about to run MR for',
       that.symbol.name, that.range.name, that.range.freq);
     that.run();
-    that.handle = setTimeout(func, that.range.freq);
+    that.handle = setTimeout(func, that.range.freq || 600000 /*10mins default*/);
   };
 
   this.handle = setTimeout(func, 0);
