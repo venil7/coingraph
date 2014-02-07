@@ -1,5 +1,3 @@
-#! /usr/bin/env node
-
 var Mongodb = require('mongodb'),
     Q       = require('q'),
     Events  = require('events'),
@@ -68,7 +66,6 @@ if (!module.parent) {
   var saver = new TickSaver(config);
 
   process.on('SIGINT', function() {
-    logger.info('disconnecting from', config.mongoServer);
     saver.shutdown();
     process.exit();
   });

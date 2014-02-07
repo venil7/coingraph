@@ -18,35 +18,49 @@ var Query = function(config) {
 
 Query.prototype = Object.create(Events.EventEmitter.prototype);
 
-Query.prototype.get = function (pair, aggr, range) {
+Query.prototype.aggregate = function (pair, range) {
   var that = this;
-  if (!~this.allPairs.indexOf(pair)) { return Q.reject(new Error("pair is not configured.")); }
-  if (!~Object.keys(MAP).filter(function(n){ return n!=="reduce" }).indexOf(aggr)) { return Q.reject(new Error("aggregate func is not configured.")); }
+  if (!~this.allPairs.indexOf(pair)) {
+    return Q.reject(new Error("pair is not configured."));
+  }
+  if (!~Object.keys(MAP)
+    .filter(function(n){ return n!=="reduce" })
+    .indexOf(range.aggr)) {
+      return Q.reject(new Error("aggregate func is not configured."));
+  }
 
   var now = +new Date(),
-      yesterday = now - 60 * 60 * 24 * 1000;
-  range = (Array.isArray(range) && (range.length >= 2))
-          ? range.slice(0, 2)
-          : typeof range == "number" ? [now, range] : [now, yesterday];
-  var gte = Math.min.apply(null, range);
-  var lte = Math.max.apply(null, range);
+      then = now - range.range,
+      range_array = [now, then];
+
+  var gte = Math.min.apply(null, range_array);
+  var lte = Math.max.apply(null, range_array);
   var query = { server_time: { $gte: gte, $lte: lte } };
-  var map = MAP[aggr];
+  var map = MAP[range.aggr];
   var reduce = MAP.reduce;
-  logger.info('querying', query);
+  var out_collection = this.collectionName(pair, range.name);
+  logger.info('running map-reduce', query);
 
   return this.db()
     .then(function(db) {
       var collection = db.collection(pair);
-      return Q.nfcall(collection.mapReduce.bind(collection), map, reduce, { out: { inline: 1 }, query: query });
+      return Q.nfcall(collection.mapReduce.bind(collection),
+        map, reduce, { query: query, out: out_collection });
     });
 };
 
-Query.prototype.get_range = function(pair, range) {
-  var idx = this.allRanges.indexOf(range);
-  if (!~idx) { return Q.reject(new Error("range is not configured.")); }
-  var range = config.ranges[idx];
-  return this.get(pair, range.aggr, +new Date() - range.range);
+Query.prototype.get_range = function(pair, range_name) {
+  var collection_name = this.collectionName(pair, range_name);
+  logger.info('getting all from', collection_name);
+  return this.db()
+    .then(function(db){
+      var collection = db.collection(collection_name);
+        return Q.nfcall(
+          collection.find.bind(collection), {}, { limit: 100 })
+        .then(function(cursor){
+          return Q.nfcall(cursor.toArray.bind(cursor));
+        });
+    });
 };
 
 Query.prototype.get_latest_snapshot = function () {
@@ -64,7 +78,17 @@ Query.prototype.get_latest_snapshot = function () {
                 return lodash.zipObject(that.allPairs, values);
               });
     });
-}
+};
+
+Query.prototype.collectionName = function (pair, rangeName) {
+  var template = "<%= pair %>_<%= rangeName %>";
+  var model = {
+    pair: pair,
+    rangeName: rangeName.replace(/\s+/g, '_').toLowerCase()
+  };
+
+  return lodash.template(template, model);
+};
 
 Query.prototype.close = function () {
   this.db()

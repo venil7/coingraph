@@ -2,8 +2,10 @@ var static = require('node-static'),
     http   = require('http'),
     socket = require('socket.io'),
     Query  = require('./query'),
-    Logger = require('./logger'),
-    config = require('./config');
+    TickSaver  = require('./ticksaver'),
+    MRSaver    = require("./mrsaver"),
+    Logger     = require('./logger'),
+    config     = require('./config');
 
 var logger = Logger(module, config.logging.web);
 var staticServer = new static.Server(config.web.public, { cache: config.web.cache || 7200 });
@@ -69,8 +71,14 @@ var latestUpdate = function() {
 
 setInterval(latestUpdate, config.tickerFreq);
 
+var tick_saver = new TickSaver.TickSaver(config);
+var mr_saver = new MRSaver.MRSaver(config.symbols, config.ranges, query);
+mr_saver.start();
+
 process.on('SIGINT', function() {
   logger.info('disconnecting from', config.mongoServer);
+  tick_saver.shutdown();
+  mr_saver.close();
   query.close();
   process.exit( );
 });

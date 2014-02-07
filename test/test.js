@@ -4,16 +4,22 @@ var Query = require("../query");
 var config = require("../config");
 
 var query = new Query.Query(config);
+var MRSaver = require("../mrsaver").MRSaver;
 
-query.get_latest_snapshot()
-  .then(function(array) {
-      console.log(array);
-    query.close();
-  })
-  .catch(function(err){
-    console.log("error:", err.toString());
-    query.close();
-  });
+var saver = new MRSaver(config.symbols, config.ranges, query);
+saver.start();
+
+Mongodb.connect(config.mongoServer, function(err, db) { });
+
+// query.get_latest_snapshot()
+//   .then(function(array) {
+//       console.log(array);
+//     query.close();
+//   })
+//   .catch(function(err){
+//     console.log("error:", err.toString());
+//     query.close();
+//   });
 
 // var minute_map = function() {
 //   var minute = 1000 * 60;
