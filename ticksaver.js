@@ -24,7 +24,7 @@ var TickSaver = function(config) {
   };
 };
 
-TickSaver.prototype = Object.create(Events.EventEmitter.prototype);
+// TickSaver.prototype = Object.create(Events.EventEmitter.prototype);
 
 TickSaver.prototype.save = function(pairData, pair) {
     this.db()

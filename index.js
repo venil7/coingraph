@@ -1,16 +1,16 @@
 var static = require('node-static'),
     http   = require('http'),
     socket = require('socket.io'),
-    Query  = require('./query'),
+    lodash = require('lodash'),
+    Query      = require('./query'),
     TickSaver  = require('./ticksaver'),
-    MRSaver    = require("./mrsaver"),
     Logger     = require('./logger'),
     config     = require('./config');
 
 var logger = Logger(module, config.logging.web);
 var staticServer = new static.Server(config.web.public, { cache: config.web.cache || 7200 });
 
-var port = config.web.port || 3000;
+var port = config.web.port || 3030;
 var host = config.web.host || "localhost";
 
 var errorLogger = function(err) {
@@ -42,7 +42,7 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('update', function (state) {
     logger.info('client asked for data', state);
-    var result = query.get_range(state.symbol.pair, state.range.name);
+    var result = query.get_range(state.symbol.pair, state.range);
     result
       .then(function(data) {
         socket.emit('update', data);
@@ -58,7 +58,7 @@ io.sockets.on('connection', function (socket) {
 
 });
 
-var latestUpdate = function() {
+var latestSnapshot = function() {
   var clients = io.sockets.clients();
   if (clients && clients.length) {
     query.get_latest_snapshot()
@@ -69,16 +69,17 @@ var latestUpdate = function() {
   }
 };
 
-setInterval(latestUpdate, config.tickerFreq);
+if (!lodash.contains(process.argv, "--no-snapshot")) {
+  setInterval(latestSnapshot, config.tickerFreq);
+}
 
-var tick_saver = new TickSaver.TickSaver(config);
-var mr_saver = new MRSaver.MRSaver(config.symbols, config.ranges, query);
-mr_saver.start();
+if (!lodash.contains(process.argv, "--no-ticksaver")) {
+  var tick_saver = new TickSaver.TickSaver(config);
+}
 
 process.on('SIGINT', function() {
   logger.info('disconnecting from', config.mongoServer);
-  tick_saver.shutdown();
-  mr_saver.stop();
+  !!tick_saver && tick_saver.shutdown();
   query.close();
-  process.exit( );
+  process.exit();
 });
