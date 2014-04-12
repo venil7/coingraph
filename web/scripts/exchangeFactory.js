@@ -1,4 +1,6 @@
-coingraph.factory('exchange', ['$rootScope', function($rootScope) {
+var app = require("./app");
+
+app.factory("exchange", ["$rootScope", function($rootScope) {
   var scope = $rootScope.$new();
   return {
     update: function(name, value) {

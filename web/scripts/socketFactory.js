@@ -1,4 +1,7 @@
-coingraph.factory('Socket', ['$rootScope', function($rootScope) {
+var app = require("./app"),
+    ScopedSocket = require("./scopedsocket");
+
+app.factory("Socket", ["$rootScope", function($rootScope) {
   var socket = io.connect();
 
   // When injected into controllers, etc., Socket is a function
@@ -7,7 +10,7 @@ coingraph.factory('Socket', ['$rootScope', function($rootScope) {
   // it will call `removeAllListeners` on that ScopedSocket.
   return function(scope) {
     var scopedSocket = new ScopedSocket(socket, $rootScope);
-    scope.$on('$destroy', function() {
+    scope.$on("$destroy", function() {
       scopedSocket.removeAllListeners();
     });
     return scopedSocket;

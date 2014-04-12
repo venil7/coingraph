@@ -14,7 +14,7 @@ ScopedSocket.prototype.removeAllListeners = function() {
   for(var i = 0; i < this.listeners.length; i++) {
     var details = this.listeners[i];
     this.socket.removeListener(details.event, details.fn);
-  };
+  }
 };
 
 ScopedSocket.prototype.on = function(event, callback) {
@@ -45,3 +45,5 @@ ScopedSocket.prototype.emit = function(event, data, callback) {
     });
   });
 };
+
+module.exports = ScopedSocket;

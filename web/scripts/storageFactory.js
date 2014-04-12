@@ -1,4 +1,6 @@
-coingraph.factory('storage', function(){
+var app = require("./app");
+
+app.factory("storage", function() {
   localStorage = localStorage || {};
   return {
     set: function(name, value) {
@@ -23,5 +25,5 @@ coingraph.factory('storage', function(){
       }
       return value;
     }
-  }
+  };
 });

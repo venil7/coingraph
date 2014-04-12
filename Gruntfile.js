@@ -1,4 +1,4 @@
-module.exports = function(grunt){
+module.exports = function(grunt) {
 
     require("matchdep").filterDev("grunt-*").forEach(grunt.loadNpmTasks);
 
@@ -15,21 +15,21 @@ module.exports = function(grunt){
             sourceMap: 'dist/scripts/app.js.map',
             sourceMappingURL: '/scripts/app.js.map'*/
           },
-          prod: {
+          browserify: { /*only uglifies browserify output*/
             files: {
               'dist/scripts/app.min.js':
-                [ 'web/scripts/*.js' ]
+                [ 'dist/scripts/app.js' ]
             }
+          }
+        },
+
+        browserify: {
+          options: {
+            debug: true
           },
-          dev: {
-            options: {
-              compress: false,
-              beautify: true,
-              drop_console: false
-            },
+          compile: {
             files: {
-              'dist/scripts/app.js':
-                [ 'web/scripts/*.js' ]
+              'dist/scripts/app.js': ['web/scripts/*.js']
             }
           }
         },
@@ -93,13 +93,14 @@ module.exports = function(grunt){
         clean: {
           dist: {
             src: ["dist/"]
-          }
+          },
+          browserify: ['dist/scripts/app.js']
         },
 
         watch: {
           js: {
             files: ['web/scripts/*.js'],
-            tasks: ['uglify:dev']
+            tasks: ['browserify']
           },
 
           less: {
@@ -143,7 +144,7 @@ module.exports = function(grunt){
     grunt.registerTask('build', [
       'clean:dist',
       'copy',
-      'uglify:dev',
+      'browserify',
       'less']);
 
     grunt.registerTask('build-prod', [
@@ -152,7 +153,9 @@ module.exports = function(grunt){
       'replace:prod-html',
       'copy:bower',
       'copy:ico',
-      'uglify:prod',
+      'browserify',
+      'uglify:browserify',
+      'clean:browserify',
       'less']);
 
     grunt.registerTask('dev', [
