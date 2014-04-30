@@ -1,7 +1,7 @@
 {
   "name": "btcgraph",
   "main": "index.js",
-  "version": "0.0.1",
+  "version": "1.1.0",
   "authors": [
     "Art <github@darkruby.co.uk>"
   ],
@@ -17,7 +17,8 @@
     "angular": "~1.2.7",
     "d3": "~3.3.13",
     "n3-charts-line-chart": "https://github.com/n3-charts/line-chart.git#~1.0.2",
-    "momentjs": "~2.5.0"
+    "momentjs": "~2.5.0",
+    "bootstrap": "3.0.3"
   },
   "homepage": "https://github.com/venil7/coingraph"
 }
